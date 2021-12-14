@@ -6,7 +6,7 @@ from configs.config import TaskConfig
 class MRF(nn.Module):
     def __init__(self, channels):
         super().__init__()
-        self.blocks = nn.ModuleList([ResBlock(channels, kernel) for kernel in TaskConfig.kernels])
+        self.blocks = nn.ModuleList([ResBlock(channels, kernel, i) for i, kernel in enumerate(TaskConfig.kernels)])
 
     def forward(self, x):
         for i in range(len(self.blocks)):

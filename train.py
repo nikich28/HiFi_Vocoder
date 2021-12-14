@@ -1,5 +1,4 @@
 import torch
-import torchaudio
 
 from model.Generator import Generator
 from configs.config import TaskConfig
@@ -91,5 +90,4 @@ if __name__ == '__main__':
     logger = WanDBWriter(config)
 
     # training
-    train(model, dataloader, test_texts, scheduler, criterion, featurizer, logger,
-          melspec_config, config)
+    train(model, dataloader, test_texts, scheduler, criterion, featurizer, logger, melspec_config, config)

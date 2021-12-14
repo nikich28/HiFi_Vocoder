@@ -10,6 +10,9 @@ def train_epoch(model, scheduler, dataloader, criterion, featurizer, logger, epo
 
         scheduler.zero_grad()
         output = model(spect)
+        # print(batch.waveform.size())
+        # print(spect.size())
+        # print(output.size())
 
         loss = criterion(batch.waveform, output)
         loss.backward()

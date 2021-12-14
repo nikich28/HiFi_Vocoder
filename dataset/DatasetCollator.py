@@ -5,8 +5,8 @@ from typing import List, Tuple, Dict
 
 
 class LJSpeechCollator:
-    def __call__(self, instances: List[Tuple]) -> Dict:
-        waveform, waveform_length, transcript, tokens, token_lengths = list(
+    def __call__(self, instances: List[Tuple]) -> Batch:
+        waveform, waveform_length = list(
             zip(*instances)
         )
 
@@ -15,9 +15,4 @@ class LJSpeechCollator:
         ]).transpose(0, 1)
         waveform_length = torch.cat(waveform_length)
 
-        tokens = pad_sequence([
-            tokens_[0] for tokens_ in tokens
-        ]).transpose(0, 1)
-        token_lengths = torch.cat(token_lengths)
-
-        return Batch(waveform, waveform_length, transcript, tokens, token_lengths)
+        return Batch(waveform, waveform_length)
