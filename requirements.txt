@@ -1,0 +1,6 @@
+typing
+numpy
+tqdm
+librosa
+dataclasses
+wandb
