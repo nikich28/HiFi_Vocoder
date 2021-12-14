@@ -3,6 +3,7 @@ from torch import nn
 
 class GenLoss(nn.Module):
     def __init__(self):
+        super().__init__()
         self.mse = nn.L1Loss()
 
     def forward(self, real, fake):

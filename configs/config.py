@@ -5,7 +5,7 @@ import torch
 @dataclass
 class TaskConfig:
     device: torch.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    batch_size: int = 2
+    batch_size: int = 8
     kernels = [3, 7, 11]
     dilations = [[1, 3, 5]] * 3
     leaky: float = 0.1
