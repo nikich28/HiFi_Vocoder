@@ -76,6 +76,9 @@ if __name__ == '__main__':
                             collate_fn=LJSpeechCollator()
                             )
 
+    # for overfit version
+    dataloader = [next(iter(dataloader))]
+
     # model
     model = Generator().to(config.device)
 
