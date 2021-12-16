@@ -70,7 +70,7 @@ if __name__ == '__main__':
     featurizer = MelSpectrogram(melspec_config).to(config.device)
 
     # data
-    dataset = LJSpeechDataset(root=root)
+    dataset = LJSpeechDataset(root=root, size_of_wav=8912)
     dataloader = DataLoader(dataset, num_workers=4, pin_memory=True, batch_size=config.batch_size,
                             collate_fn=LJSpeechCollator()
                             )

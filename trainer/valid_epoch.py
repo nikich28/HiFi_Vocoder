@@ -3,19 +3,18 @@ import torch
 
 
 @torch.no_grad()
-def valid_epoch(model, scheduler, dataloader, criterion, featurizer, logger, epoch, melspec_config, config):
+def valid_epoch(model, dataloader, criterion, featurizer, logger, epoch, melspec_config, config):
     model.eval()
     for i, batch in tqdm(enumerate(dataloader), position=0, leave=True):
         batch = batch.to(config.device)
 
         spect = featurizer(batch.waveform)
 
-        scheduler.zero_grad()
         output = model(spect)
+        predicted_spect = featurizer(output)
 
-        loss = criterion(batch.waveform, output)
+        loss = criterion(spect, predicted_spect)
         loss.backward()
-        scheduler.step()
         # log all loses
         logger.set_step(i + epoch * len(dataloader))
         logger.add_scalar('loss', loss.item())
@@ -29,3 +28,6 @@ def valid_epoch(model, scheduler, dataloader, criterion, featurizer, logger, epo
     if (epoch + 1) % config.show_every == 0:
         logger.add_audio("Ground_truth", batch.waveform[0], sample_rate=melspec_config.sr)
         logger.add_audio("predicted", output[0], sample_rate=melspec_config.sr)
+
+        logger.add_image("Ground_truth_spect", Image.open(spect[0]))
+        logger.add_image("Predicted_spect", Image.open(predicted_spect[0]))

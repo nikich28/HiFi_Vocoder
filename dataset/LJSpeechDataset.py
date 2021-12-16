@@ -1,6 +1,7 @@
 import torch
 import torchaudio
 from dataclasses import dataclass
+import random
 
 
 @dataclass
@@ -15,14 +16,18 @@ class Batch:
 
 
 class LJSpeechDataset(torchaudio.datasets.LJSPEECH):
-    def __init__(self, root):
+    def __init__(self, root, size_of_wav=8912):
         super().__init__(root=root)
+        self.wav_size = size_of_wav
 
     def __getitem__(self, index: int):
         waveform, _, _, transcript = super().__getitem__(index)
         waveform_length = torch.tensor([waveform.shape[-1]]).int()
 
-        return waveform, waveform_length
+        if waveform.shape[1] <= self.wav_size:
+            return waveform, waveform_length
+        idx = random.randint(0, waveform.shape[1] - self.wav_size)
+        return waveform[:, idx: idx + self.wav_size], waveform_length
 
     # def decode(self, tokens, lengths):
     #     result = []

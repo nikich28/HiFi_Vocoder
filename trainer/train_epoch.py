@@ -1,4 +1,5 @@
 from tqdm import tqdm
+from PIL import Image
 
 
 def train_epoch(model, scheduler, dataloader, criterion, featurizer, logger, epoch, melspec_config, config):
@@ -14,7 +15,9 @@ def train_epoch(model, scheduler, dataloader, criterion, featurizer, logger, epo
         # print(spect.size())
         # print(output.size())
 
-        loss = criterion(batch.waveform, output)
+        predicted_spect = featurizer(output)
+
+        loss = criterion(spect, predicted_spect)
         loss.backward()
         scheduler.step()
         # log all loses
@@ -30,3 +33,6 @@ def train_epoch(model, scheduler, dataloader, criterion, featurizer, logger, epo
     if (epoch + 1) % config.show_every == 0:
         logger.add_audio("Ground_truth", batch.waveform[0], sample_rate=melspec_config.sr)
         logger.add_audio("predicted", output[0], sample_rate=melspec_config.sr)
+
+        logger.add_image("Ground_truth_spect", Image.open(spect[0]))
+        logger.add_image("Predicted_spect", Image.open(predicted_spect[0]))

@@ -42,14 +42,15 @@ class MelSpectrogram(nn.Module):
 
         # Default `torchaudio` mel basis uses HTK formula. In order to be compatible with WaveGlow
         # we decided to use Slaney one instead (as well as `librosa` does by default).
-        mel_basis = librosa.filters.mel(
-            sr=config.sr,
-            n_fft=config.n_fft,
-            n_mels=config.n_mels,
-            fmin=config.f_min,
-            fmax=config.f_max
-        ).T
-        self.mel_spectrogram.mel_scale.fb.copy_(torch.tensor(mel_basis))
+
+        # mel_basis = librosa.filters.mel(
+        #     sr=config.sr,
+        #     n_fft=config.n_fft,
+        #     n_mels=config.n_mels,
+        #     fmin=config.f_min,
+        #     fmax=config.f_max
+        # ).T
+        # self.mel_spectrogram.mel_scale.fb.copy_(torch.tensor(mel_basis))
 
     def forward(self, audio: torch.Tensor) -> torch.Tensor:
         """
