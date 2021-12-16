@@ -9,9 +9,10 @@ class MRF(nn.Module):
         self.blocks = nn.ModuleList([ResBlock(channels, kernel, i) for i, kernel in enumerate(TaskConfig.kernels)])
 
     def forward(self, x):
+        ans = 0
         for i in range(len(self.blocks)):
             if i != 0:
-                x = x + self.blocks[i](x)
+                ans = ans + self.blocks[i](x)
             else:
-                x = self.blocks[i](x)
-        return x / len(self.blocks)
+                ans = self.blocks[i](x)
+        return ans / len(self.blocks)
