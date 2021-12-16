@@ -16,7 +16,7 @@ class Batch:
 
 
 class LJSpeechDataset(torchaudio.datasets.LJSPEECH):
-    def __init__(self, root, size_of_wav=8912):
+    def __init__(self, root, size_of_wav=8192):
         super().__init__(root=root)
         self.wav_size = size_of_wav
 
