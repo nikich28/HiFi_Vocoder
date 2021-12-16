@@ -1,5 +1,7 @@
 from tqdm import tqdm
 import torch
+import numpy as np
+import matplotlib.pyplot as plt
 
 
 @torch.no_grad()
@@ -29,5 +31,5 @@ def valid_epoch(model, dataloader, criterion, featurizer, logger, epoch, melspec
         logger.add_audio("Ground_truth", batch.waveform[0], sample_rate=melspec_config.sr)
         logger.add_audio("predicted", output[0], sample_rate=melspec_config.sr)
 
-        logger.add_image("Ground_truth_spect", Image.open(spect[0]))
-        logger.add_image("Predicted_spect", Image.open(predicted_spect[0]))
+        logger.add_image("Ground_truth_spect", plt.imshow(spect[0].detach().cpu().numpy()))
+        logger.add_image("Predicted_spect", plt.imshow(predicted_spect[0].detach().cpu().numpy()))

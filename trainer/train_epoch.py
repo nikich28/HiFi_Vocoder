@@ -1,5 +1,6 @@
 from tqdm import tqdm
-from PIL import Image
+import matplotlib.pyplot as plt
+import numpy as np
 
 
 def train_epoch(model, scheduler, dataloader, criterion, featurizer, logger, epoch, melspec_config, config):
@@ -34,5 +35,5 @@ def train_epoch(model, scheduler, dataloader, criterion, featurizer, logger, epo
         logger.add_audio("Ground_truth", batch.waveform[0], sample_rate=melspec_config.sr)
         logger.add_audio("predicted", output[0], sample_rate=melspec_config.sr)
 
-        logger.add_image("Ground_truth_spect", Image.open(spect[0]))
-        logger.add_image("Predicted_spect", Image.open(predicted_spect[0]))
+        logger.add_image("Ground_truth_spect", plt.imshow(spect[0].detach().cpu().numpy()))
+        logger.add_image("Predicted_spect", plt.imshow(predicted_spect[0].detach().cpu().numpy()))
