@@ -13,6 +13,7 @@ class TaskConfig:
     num_blocks: int = 3
     mel_channels: int = 80
     kernels_up = [16, 16, 4, 4]
+    disc_periods = [2, 3, 5, 7, 11]
 
     warmup: int = 4000
     n_epochs: int = 5000
