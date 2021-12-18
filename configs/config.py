@@ -5,7 +5,7 @@ import torch
 @dataclass
 class TaskConfig:
     device: torch.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    batch_size: int = 8
+    batch_size: int = 64
     kernels = [3, 7, 11]
     dilations = [[1, 3, 5]] * 3
     leaky: float = 0.1
@@ -16,8 +16,8 @@ class TaskConfig:
     disc_periods = [2, 3, 5, 7, 11]
 
     warmup: int = 4000
-    n_epochs: int = 1000
-    show_every: int = 100
+    n_epochs: int = 100
+    show_every: int = 5
     save_every: int = 20
     lr: float = 2e-4
     project_name: str = 'hifi_vocoder'
