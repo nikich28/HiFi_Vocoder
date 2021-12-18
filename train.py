@@ -1,8 +1,10 @@
 import torch
 
 from model.Generator import Generator
+from model.Discriminator import Discriminator
 from configs.config import TaskConfig
 from loss.gen_loss import GenLoss
+from loss.disc_loss import DiscLoss
 from dataset.LJSpeechDataset import LJSpeechDataset
 from dataset.DatasetCollator import LJSpeechCollator
 from utils.featurizer import MelSpectrogramConfig, MelSpectrogram
@@ -46,13 +48,13 @@ class CustomScheduler:
         self.optimizer.step()
 
 
-def train(model, dataloader, test_texts, scheduler, criterion, featurizer, logger,
+def train(model, disc, dataloader, test_texts, schedulers, criterions, featurizer, logger,
           melspec_config, config):
     for epoch in range(config.n_epochs):
         print(f'Start of the epoch {epoch}')
-        train_epoch(model, scheduler, dataloader, criterion, featurizer, logger, epoch, melspec_config, config)
+        train_epoch(model, disc, schedulers, dataloader, criterions, featurizer, logger, epoch, melspec_config, config)
         # if (epoch + 1) % config.show_every == 0:
-        #     valid(model, test_texts, criterion, featurizer, logger, epoch, melspec_config, config)
+        #     valid(model, disc, test_texts, criterions, featurizer, logger, epoch, melspec_config, config)
 
 
 if __name__ == '__main__':
@@ -80,14 +82,17 @@ if __name__ == '__main__':
 
     # model
     model = Generator().to(config.device)
+    disc = Discriminator().to(config.device)
 
     # optmizations
-    criterion = GenLoss()
-    optimizer = torch.optim.AdamW(model.parameters(), lr=config.lr, betas=(0.9, 0.98), eps=1e-9)
-    scheduler = CustomScheduler(config.chs, optimizer, config.warmup)
+    criterions = [GenLoss(), DiscLoss()]
+    g_optimizer = torch.optim.AdamW(model.parameters(), lr=config.lr, betas=(0.9, 0.98), eps=1e-9)
+    d_optimizer = torch.optim.AdamW(model.parameters(), lr=config.lr, betas=(0.9, 0.98), eps=1e-9)
+    schedulers = [CustomScheduler(config.chs, g_optimizer, config.warmup),
+                  CustomScheduler(config.chs, d_optimizer, config.warmup)]
 
     # wandb
     logger = WanDBWriter(config)
 
     # training
-    train(model, dataloader, test_texts, scheduler, criterion, featurizer, logger, melspec_config, config)
+    train(model, disc, dataloader, test_texts, schedulers, criterions, featurizer, logger, melspec_config, config)

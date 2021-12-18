@@ -16,7 +16,8 @@ class TaskConfig:
     disc_periods = [2, 3, 5, 7, 11]
 
     warmup: int = 4000
-    n_epochs: int = 5000
+    n_epochs: int = 1000
     show_every: int = 100
+    save_every: int = 20
     lr: float = 1e-4
     project_name: str = 'vocoder'
