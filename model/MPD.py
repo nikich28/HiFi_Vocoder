@@ -26,7 +26,6 @@ class MPDBlock(nn.Module):
         self.convs.append(weight_norm(nn.Conv1d(1024, 1, kernel_size=(3, 1), stride=(1, 1))))
 
     def forward(self, x):
-        padding = -x.size(-1) % self.period
         x = F.pad(x, (0, -x.shape[-1] % self.period), 'reflect')
         x = x.view(x.size(0), x.size(1), -1, self.period)
 

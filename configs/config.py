@@ -16,7 +16,7 @@ class TaskConfig:
     disc_periods = [2, 3, 5, 7, 11]
 
     warmup: int = 4000
-    n_epochs: int = 80
+    n_epochs: int = 100
     show_every: int = 2
     save_every: int = 10
     lr: float = 2e-4
