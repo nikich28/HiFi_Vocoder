@@ -25,11 +25,11 @@ torch.backends.cudnn.deterministic = True
 root = '../'
 
 
-def train(model, disc, dataloader, optims, schedulers, criterions, featurizer, logger,
-          melspec_config, config):
+def train(model, disc, dataloader, optims, schedulers, criterions, featurizer, logger, melspec_config, config):
     for epoch in range(config.n_epochs):
         print(f'Start of the epoch {epoch}')
-        train_epoch(model, disc, optims, schedulers, dataloader, criterions, featurizer, logger, epoch, melspec_config, config)
+        train_epoch(model, disc, optims, schedulers, dataloader, criterions, featurizer, logger, epoch,
+                    melspec_config, config)
 
         if (epoch + 1) % config.show_every == 0:
             test_epoch(model, featurizer, logger, epoch, melspec_config, config)

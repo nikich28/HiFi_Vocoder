@@ -7,7 +7,8 @@ from loss.gen_loss import L1LOSS
 import torch
 
 
-def train_epoch(model, disc, optims, schedulers, dataloader, criterions, featurizer, logger, epoch, melspec_config, config):
+def train_epoch(model, disc, optims, schedulers, dataloader, criterions, featurizer, logger, epoch,
+                melspec_config, config):
     model.train()
     disc.train()
     gen_cr, disc_cr = criterions

@@ -11,4 +11,4 @@ class Discriminator(nn.Module):
         self.mpd = MPD()
 
     def forward(self, x):
-        return self.mpd(x.unsqeeze(1)), self.msd(x.unsqueeze(1))
+        return self.mpd(x.unsqueeze(1)), self.msd(x.unsqueeze(1))

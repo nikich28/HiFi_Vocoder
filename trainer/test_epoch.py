@@ -29,7 +29,8 @@ def test_epoch(model, featurizer, logger, epoch, melspec_config, config):
 
 
         # log all loses
-        logger.set_step(epoch, mode='test')
+        tmp_step = logger.step
+        logger.set_step(tmp_step, mode='test')
 
         logger.add_audio(f"Ground_truth_{file}", waveform[0], sample_rate=melspec_config.sr)
         logger.add_audio(f"Predicted_{file}", output[0], sample_rate=melspec_config.sr)
