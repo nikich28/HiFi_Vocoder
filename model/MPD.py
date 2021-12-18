@@ -13,13 +13,13 @@ class MPDBlock(nn.Module):
         chs = 1
         for i in range(1, 5):
             self.convs.append(nn.Sequential(
-                weight_norm(nn.Conv1d(chs, 2 ** (5 + l), kernel_size=(5, 1), stride=(3, 1))),
+                weight_norm(nn.Conv1d(chs, 2 ** (5 + i), kernel_size=(5, 1), stride=(3, 1), padding=(2, 0))),
                 nn.LeakyReLU(TaskConfig.leaky)
             ))
-            chs = 2 ** (5 + l)
+            chs = 2 ** (5 + i)
 
         self.convs.append(nn.Sequential(
-            weight_norm(nn.Conv1d(chs, 1024, kernel_size=(5, 1), stride=(1, 1))),
+            weight_norm(nn.Conv1d(chs, 1024, kernel_size=(5, 1), stride=(1, 1), padding=(2, 0))),
             nn.LeakyReLU(TaskConfig.leaky)
         ))
 

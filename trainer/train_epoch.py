@@ -2,14 +2,16 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 import numpy as np
 from torch import nn
+import torch.nn.functional as F
+from loss.gen_loss import L1LOSS
 
 
-def train_epoch(model, disc, schedulers, dataloader, criterions, featurizer, logger, epoch, melspec_config, config):
+def train_epoch(model, disc, optims, dataloader, criterions, featurizer, logger, epoch, melspec_config, config):
     model.train()
     disc.train()
     gen_cr, disc_cr = criterions
-    gen_opt, disc_opt = schedulers
-    for i, batch in tqdm(enumerate(dataloader), position=0, leave=True):
+    gen_opt, disc_opt = optims
+    for i, batch in tqdm(enumerate(dataloader), position=0, leave=True, total=len(dataloader)):
         batch = batch.to(config.device)
 
         spec = featurizer(batch.waveform)
@@ -28,10 +30,14 @@ def train_epoch(model, disc, schedulers, dataloader, criterions, featurizer, log
         gen_opt.zero_grad()
         gen_out = model(spec)
         predicted_spec = featurizer(gen_out)
-        mpd_fake, msd_fake = disc(gen_out)
-        mpd_real, msd_real = disc(batch.waveform)
 
-        spec_loss = nn.L1Loss(spec, predicted_spec)
+        dif = gen_out.size(-1) - batch.waveform.size(-1)
+        waveform = F.pad(batch.waveform, (0, dif), value=melspec_config.pad_value)
+
+        mpd_fake, msd_fake = disc(gen_out)
+        mpd_real, msd_real = disc(waveform)
+
+        spec_loss = L1LOSS(spec, predicted_spec)
         gen_loss = gen_cr(msd_fake[1], msd_fake[0], msd_real[0], mpd_fake[1], mpd_fake[0], mpd_real[0])
         gen_loss += 45 * spec_loss
         gen_loss.backward()

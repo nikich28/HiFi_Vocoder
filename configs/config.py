@@ -19,5 +19,5 @@ class TaskConfig:
     n_epochs: int = 1000
     show_every: int = 100
     save_every: int = 20
-    lr: float = 1e-4
-    project_name: str = 'vocoder'
+    lr: float = 2e-4
+    project_name: str = 'hifi_vocoder'

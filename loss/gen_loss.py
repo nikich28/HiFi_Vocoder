@@ -1,4 +1,5 @@
 from torch import nn
+import torch
 from utils.featurizer import MelSpectrogramConfig
 
 
@@ -9,11 +10,6 @@ class GenLoss(nn.Module):
         self.mse = nn.MSELoss()
 
     def forward(self, msd_fake_score, msd_fake_map, msd_real_map, mpd_fake_score, mpd_fake_map, mpd_real_map):
-        # if real.size(-1) > fake.size(-1):
-        #     padded = nn.functional.pad(fake, (0, real.size(-1) - fake.size(-1)), value=MelSpectrogramConfig.pad_value)
-        #     return self.mse(padded, real)
-        # padded = nn.functional.pad(real, (0, fake.size(-1) - real.size(-1)), value=MelSpectrogramConfig.pad_value)
-        # return self.loss(fake, padded)
 
         scores_loss = 0
         spec_loss = 0
@@ -35,3 +31,12 @@ class GenLoss(nn.Module):
             scores_loss += self.mse(mpd_fake_score[i], torch.ones_like(mpd_fake_score[i]))
 
         return scores_loss + 2 * spec_loss
+
+
+def L1LOSS(real, fake):
+    loss = nn.L1Loss()
+    if real.size(-1) > fake.size(-1):
+        padded = nn.functional.pad(fake, (0, real.size(-1) - fake.size(-1)), value=MelSpectrogramConfig.pad_value)
+        return loss(padded, real)
+    padded = nn.functional.pad(real, (0, fake.size(-1) - real.size(-1)), value=MelSpectrogramConfig.pad_value)
+    return loss(fake, padded)

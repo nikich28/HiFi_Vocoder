@@ -48,11 +48,14 @@ class CustomScheduler:
         self.optimizer.step()
 
 
-def train(model, disc, dataloader, test_texts, schedulers, criterions, featurizer, logger,
+def train(model, disc, dataloader, test_texts, optims, schedulers, criterions, featurizer, logger,
           melspec_config, config):
+    gen_sch, disc_sch = schedulers
     for epoch in range(config.n_epochs):
         print(f'Start of the epoch {epoch}')
-        train_epoch(model, disc, schedulers, dataloader, criterions, featurizer, logger, epoch, melspec_config, config)
+        train_epoch(model, disc, optims, dataloader, criterions, featurizer, logger, epoch, melspec_config, config)
+        gen_sch.step()
+        disc_sch.step()
         # if (epoch + 1) % config.show_every == 0:
         #     valid(model, disc, test_texts, criterions, featurizer, logger, epoch, melspec_config, config)
 
@@ -77,22 +80,20 @@ if __name__ == '__main__':
                             collate_fn=LJSpeechCollator()
                             )
 
-    # for overfit version
-    dataloader = [next(iter(dataloader))]
-
     # model
     model = Generator().to(config.device)
     disc = Discriminator().to(config.device)
 
     # optmizations
     criterions = [GenLoss(), DiscLoss()]
-    g_optimizer = torch.optim.AdamW(model.parameters(), lr=config.lr, betas=(0.9, 0.98), eps=1e-9)
-    d_optimizer = torch.optim.AdamW(model.parameters(), lr=config.lr, betas=(0.9, 0.98), eps=1e-9)
-    schedulers = [CustomScheduler(config.chs, g_optimizer, config.warmup),
-                  CustomScheduler(config.chs, d_optimizer, config.warmup)]
+    g_optimizer = torch.optim.AdamW(model.parameters(), lr=config.lr, betas=(0.8, 0.99), eps=1e-9)
+    d_optimizer = torch.optim.AdamW(disc.parameters(), lr=config.lr, betas=(0.8, 0.99), eps=1e-9)
+    schedulers = [ExponentialLR(g_optimizer, gamma=0.999),
+                  ExponentialLR(d_optimizer, gamma=0.999)]
 
     # wandb
     logger = WanDBWriter(config)
 
     # training
-    train(model, disc, dataloader, test_texts, schedulers, criterions, featurizer, logger, melspec_config, config)
+    train(model, disc, dataloader, test_texts, [g_optimizer, d_optimizer], schedulers, criterions, featurizer, logger,
+          melspec_config, config)

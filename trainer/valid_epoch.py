@@ -3,6 +3,8 @@ import torch
 from torch import nn
 import numpy as np
 import matplotlib.pyplot as plt
+import torch.nn.functional as F
+from loss.gen_loss import L1LOSS
 
 
 @torch.no_grad()
@@ -10,7 +12,7 @@ def valid_epoch(model, disc, dataloader, criterions, featurizer, logger, epoch, 
     model.eval()
     disc.eval()
     gen_cr, disc_cr = criterions
-    for i, batch in tqdm(enumerate(dataloader), position=0, leave=True):
+    for i, batch in tqdm(enumerate(dataloader), position=0, leave=True, total=len(dataloader)):
         batch = batch.to(config.device)
 
         spec = featurizer(batch.waveform)
@@ -24,10 +26,14 @@ def valid_epoch(model, disc, dataloader, criterions, featurizer, logger, epoch, 
 
         gen_out = model(spec)
         predicted_spec = featurizer(gen_out)
-        mpd_fake, msd_fake = disc(gen_out)
-        mpd_real, msd_real = disc(batch.waveform)
 
-        spec_loss = nn.L1Loss(spec, predicted_spec)
+        dif = gen_out.size(-1) - batch.waveform.size(-1)
+        waveform = F.pad(batch.waveform, (0, dif), value=melspec_config.pad_value)
+
+        mpd_fake, msd_fake = disc(gen_out)
+        mpd_real, msd_real = disc(waveform)
+
+        spec_loss = L1LOSS(spec, predicted_spec)
         gen_loss = gen_cr(msd_fake[1], msd_fake[0], msd_real[0], mpd_fake[1], mpd_fake[0], mpd_real[0])
         gen_loss += 45 * spec_loss
 

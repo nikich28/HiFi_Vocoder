@@ -4,6 +4,7 @@ from torch import nn
 
 class DiscLoss(nn.Module):
     def __init__(self):
+        super().__init__()
         self.mse = nn.MSELoss()
 
     def forward(self, msd_fake_score, msd_real_score, mpd_fake_score, mpd_real_score):
