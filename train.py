@@ -10,8 +10,9 @@ from dataset.DatasetCollator import LJSpeechCollator
 from utils.featurizer import MelSpectrogramConfig, MelSpectrogram
 import numpy as np
 from trainer.train_epoch import train_epoch
-from trainer.valid_epoch import valid_epoch
+from trainer.test_epoch import test_epoch
 from torch.utils.data import DataLoader
+from torch.optim.lr_scheduler import ExponentialLR
 import wandb
 from logger.logger import WanDBWriter
 
@@ -24,51 +25,19 @@ torch.backends.cudnn.deterministic = True
 root = '../'
 
 
-# https://nlp.seas.harvard.edu/2018/04/03/attention.html#optimizer
-
-class CustomScheduler:
-    def __init__(self, model_size, optimizer, warmup, factor=2):
-        self.optimizer = optimizer
-        self.warmup = warmup
-        self.factor = factor
-        self.model_size = model_size
-        self._step = 0
-
-    def rate(self, step):
-        return 1 / self.factor * (self.model_size ** (-0.5) * min(step ** (-0.5), step * self.warmup ** (-1.5)))
-
-    def zero_grad(self):
-        self.optimizer.zero_grad()
-
-    def step(self):
-        self._step += 1
-        rate = self.rate(self._step)
-        for p in self.optimizer.param_groups:
-            p['lr'] = rate
-        self.optimizer.step()
-
-
-def train(model, disc, dataloader, test_texts, optims, schedulers, criterions, featurizer, logger,
+def train(model, disc, dataloader, optims, schedulers, criterions, featurizer, logger,
           melspec_config, config):
-    gen_sch, disc_sch = schedulers
     for epoch in range(config.n_epochs):
         print(f'Start of the epoch {epoch}')
-        train_epoch(model, disc, optims, dataloader, criterions, featurizer, logger, epoch, melspec_config, config)
-        gen_sch.step()
-        disc_sch.step()
-        # if (epoch + 1) % config.show_every == 0:
-        #     valid(model, disc, test_texts, criterions, featurizer, logger, epoch, melspec_config, config)
+        train_epoch(model, disc, optims, schedulers, dataloader, criterions, featurizer, logger, epoch, melspec_config, config)
+
+        if (epoch + 1) % config.show_every == 0:
+            test_epoch(model, featurizer, logger, epoch, melspec_config, config)
 
 
 if __name__ == '__main__':
     # create config
     config = TaskConfig()
-
-    test_texts = [
-        'A defibrillator is a device that gives a high energy electric shock to the heart of someone who is in cardiac arrest',
-        'Massachusetts Institute of Technology may be best known for its math, science and engineering education',
-        'Wasserstein distance or Kantorovich Rubinstein metric is a distance function defined between probability distributions on a given metric space'
-    ]
 
     # create utils
     melspec_config = MelSpectrogramConfig()
@@ -95,5 +64,5 @@ if __name__ == '__main__':
     logger = WanDBWriter(config)
 
     # training
-    train(model, disc, dataloader, test_texts, [g_optimizer, d_optimizer], schedulers, criterions, featurizer, logger,
+    train(model, disc, dataloader, [g_optimizer, d_optimizer], schedulers, criterions, featurizer, logger,
           melspec_config, config)

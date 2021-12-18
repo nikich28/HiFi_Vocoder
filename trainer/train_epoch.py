@@ -4,13 +4,15 @@ import numpy as np
 from torch import nn
 import torch.nn.functional as F
 from loss.gen_loss import L1LOSS
+import torch
 
 
-def train_epoch(model, disc, optims, dataloader, criterions, featurizer, logger, epoch, melspec_config, config):
+def train_epoch(model, disc, optims, schedulers, dataloader, criterions, featurizer, logger, epoch, melspec_config, config):
     model.train()
     disc.train()
     gen_cr, disc_cr = criterions
     gen_opt, disc_opt = optims
+    gen_sch, disc_sch = schedulers
     for i, batch in tqdm(enumerate(dataloader), position=0, leave=True, total=len(dataloader)):
         batch = batch.to(config.device)
 
@@ -49,8 +51,17 @@ def train_epoch(model, disc, optims, dataloader, criterions, featurizer, logger,
         logger.add_scalar('spectrogram_loss', spec_loss.item())
         logger.add_scalar('discriminator_loss', disc_loss.item())
 
+    gen_sch.step()
+    disc_sch.step()
     if (epoch + 1) % config.save_every == 0:
-        torch.save(model.state_dict(), f"best_model_{epoch + 1}.pth")
+        torch.save({
+                'generator': model.state_dict(),
+                'discriminator': disc.state_dict(),
+                'gen_opt': gen_opt.state_dict(),
+                'disc_opt': disc_opt.state_dict(),
+                'gen_sch': gen_sch.state_dict(),
+                'disc_sch': disc_sch.state_dict()
+        }, f"best_model_{epoch + 1}.pth")
 
     if (epoch + 1) % config.show_every == 0:
         logger.add_audio("Ground_truth", batch.waveform[0], sample_rate=melspec_config.sr)
