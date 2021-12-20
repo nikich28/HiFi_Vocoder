@@ -32,6 +32,7 @@ class MSDBlock(nn.Module):
         res.append(out)
         return res
 
+
 class MSD(nn.Module):
     def __init__(self):
         super().__init__()

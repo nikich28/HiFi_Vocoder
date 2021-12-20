@@ -45,7 +45,7 @@ if __name__ == '__main__':
 
     # data
     dataset = LJSpeechDataset(root=root, size_of_wav=8192)
-    dataloader = DataLoader(dataset, num_workers=4, pin_memory=True, batch_size=config.batch_size,
+    dataloader = DataLoader(dataset, num_workers=8, pin_memory=True, batch_size=config.batch_size,
                             collate_fn=LJSpeechCollator()
                             )
 

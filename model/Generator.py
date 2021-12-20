@@ -24,12 +24,11 @@ class Generator(nn.Module):
             ]
             self.net.append(nn.Sequential(*new_block))
             tmp_channels //= 2
-
+        self.net = nn.Sequential(*self.net)
         self.last_conv = weight_norm(nn.Conv1d(tmp_channels, 1, kernel_size=7, dilation=1, padding=3))
 
     def forward(self, x):
         x = self.first_conv(x)
-        for b in self.net:
-            x = b(x)
+        x = self.net(x)
         x = self.last_conv(self.last_act(x))
         return self.act(x).squeeze(1)

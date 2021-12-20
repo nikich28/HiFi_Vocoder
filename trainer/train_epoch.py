@@ -14,16 +14,19 @@ def train_epoch(model, disc, optims, schedulers, dataloader, criterions, featuri
     gen_cr, disc_cr = criterions
     gen_opt, disc_opt = optims
     gen_sch, disc_sch = schedulers
+    l1loss = nn.L1Loss()
     for i, batch in tqdm(enumerate(dataloader), position=0, leave=True, total=len(dataloader)):
         batch = batch.to(config.device)
         spec = featurizer(batch.waveform)
 
         output = model(spec)
         # output - predicted wav
+        out_d = output.detach()
+        output = output[:, :batch.waveform.size(1)]
 
         disc_opt.zero_grad()
 
-        mpd_fake, msd_fake = disc(output.detach())
+        mpd_fake, msd_fake = disc(out_d)
         mpd_real, msd_real = disc(batch.waveform)
         disc_loss = disc_cr(msd_fake[1], msd_real[1], mpd_fake[1], mpd_real[1])
         disc_loss.backward()
@@ -32,13 +35,10 @@ def train_epoch(model, disc, optims, schedulers, dataloader, criterions, featuri
         gen_opt.zero_grad()
         predicted_spec = featurizer(output)
 
-        dif = output.size(-1) - batch.waveform.size(-1)
-        waveform = F.pad(batch.waveform, (0, dif), value=melspec_config.pad_value)
-
         mpd_fake, msd_fake = disc(output)
-        mpd_real, msd_real = disc(waveform)
+        mpd_real, msd_real = disc(batch.waveform)
 
-        spec_loss = L1LOSS(spec, predicted_spec)
+        spec_loss = l1loss(spec, predicted_spec)
         gen_loss = gen_cr(msd_fake[1], msd_fake[0], msd_real[0], mpd_fake[1], mpd_fake[0], mpd_real[0])
         gen_loss += 45 * spec_loss
         gen_loss.backward()
