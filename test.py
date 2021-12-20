@@ -33,7 +33,7 @@ if __name__ == '__main__':
 
     # model
     model = Generator().to(config.device)
-    model.load_state_dict(torch.load('best_model70.pth')['generator'])
+    model.load_state_dict(torch.load('best_model.pth')['generator'])
 
     # wandb
     logger = WanDBWriter(config)

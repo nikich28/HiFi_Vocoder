@@ -20,8 +20,8 @@ Commands for training and testing:
 
 
 #or simply load checkpoint from gdrive
-!FILEID='1Kd7CBj5q2vK1w6II58jNWTKRPpOmnkzh' && \
-FILENAME='best_model70.pth' && \
+!FILEID='1Nci6ClK3EuTXBRYtnSS-uCQ8uP1J3w5X' && \
+FILENAME='best_model.pth' && \
 FILEDEST="https://docs.google.com/uc?export=download&id=${FILEID}" && \
 wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate ${FILEDEST} -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=${FILEID}" -O $FILENAME && rm -rf /tmp/cookies.txt
 
